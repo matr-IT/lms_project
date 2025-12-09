@@ -9,7 +9,7 @@ from lms.apps import LmsConfig
 app_name = LmsConfig.name
 
 router = SimpleRouter()
-router.register("", CourseViewSet)
+router.register(r"courses", CourseViewSet, basename="courses")
 
 
 urlpatterns = [

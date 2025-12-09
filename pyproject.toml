@@ -13,7 +13,10 @@ dependencies = [
     "pillow (>=12.0.0,<13.0.0)",
     "djangorestframework (>=3.16.1,<4.0.0)",
     "black (>=25.11.0,<26.0.0)",
-    "python-dotenv (>=1.2.1,<2.0.0)"
+    "python-dotenv (>=1.2.1,<2.0.0)",
+    "isort (>=7.0.0,<8.0.0)",
+    "flake8 (>=7.3.0,<8.0.0)",
+    "mypy (>=1.19.0,<2.0.0)"
 ]
 
 
