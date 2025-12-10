@@ -8,7 +8,10 @@ class Course(models.Model):
         help_text="Укажите название курса",
     )
     preview = models.ImageField(
-        upload_to="courses/image", help_text="Добавьте заставку для курса", blank=True, null=True
+        upload_to="courses/image",
+        help_text="Добавьте заставку для курса",
+        blank=True,
+        null=True,
     )
     description = models.TextField(
         blank=True,
@@ -45,3 +48,6 @@ class Lesson(models.Model):
         verbose_name="Название курса",
         help_text="Выберите, к какому курсу относится урок",
     )
+
+    def __str__(self):
+        return self.name
