@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import CASCADE
 
 
 class Course(models.Model):
@@ -18,6 +19,14 @@ class Course(models.Model):
         null=True,
         verbose_name="описание курса",
         help_text="Добавьте описание",
+    )
+    owner = models.ForeignKey(
+        "users.User",
+        on_delete=CASCADE,
+        null=True,
+        blank=True,
+        verbose_name="Владелец",
+        help_text="Владелец курса",
     )
 
 
@@ -47,6 +56,15 @@ class Lesson(models.Model):
         on_delete=models.CASCADE,
         verbose_name="Название курса",
         help_text="Выберите, к какому курсу относится урок",
+    )
+
+    owner = models.ForeignKey(
+        "users.User",
+        on_delete=CASCADE,
+        null=True,
+        blank=True,
+        verbose_name="Владелец",
+        help_text="Владелец урока",
     )
 
     def __str__(self):
