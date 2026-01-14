@@ -1,16 +1,18 @@
-from django.template.context_processors import request
 from rest_framework.generics import (
     CreateAPIView,
     DestroyAPIView,
     ListAPIView,
     RetrieveAPIView,
     UpdateAPIView,
+    get_object_or_404,
 )
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from django.contrib.auth import get_user_model
 
-from lms.models import Course, Lesson
+from lms.models import Course, Lesson, Subscription
+from lms.paginators import MyPagination
 from lms.serializers import CourseSerializer, LessonSerializer
 from users.permissions import IsModerator, IsOwner
 
@@ -19,6 +21,7 @@ User = get_user_model()
 
 class CourseViewSet(ModelViewSet):
     serializer_class = CourseSerializer
+    pagination_class = MyPagination
 
     def get_queryset(self):
         user = self.request.user
@@ -47,6 +50,26 @@ class CourseViewSet(ModelViewSet):
         return super().get_permissions()
 
 
+class SubscriptionAPIView(CreateAPIView):
+    serializer_class = CourseSerializer
+
+    def post(self, request, *args, **kwargs):
+        user = self.request.user
+        course_id = request.data.get("course_id")
+        if not course_id:
+            return Response({"error": "course_id is required"}, status=400)
+
+        course = get_object_or_404(Course, id=course_id)
+        sub = Subscription.objects.filter(user=user, course=course).first()
+        if sub:
+            sub.delete()
+            message = "Unsubscribed successfully."
+        else:
+            Subscription.objects.create(user=user, course=course)
+            message = "Subscribed successfully."
+        return Response({"message": message})
+
+
 class LessonCreateAPIView(CreateAPIView):
     serializer_class = LessonSerializer
 
@@ -64,11 +87,12 @@ class LessonCreateAPIView(CreateAPIView):
         lesson.owner = self.request.user
         lesson.save()
 
-    permission_classes = [IsAuthenticated, ~IsModerator]
+    permission_classes = [IsAuthenticated]
 
 
 class LessonListAPIView(ListAPIView):
     serializer_class = LessonSerializer
+    pagination_class = MyPagination
 
     def get_queryset(self):
         user = self.request.user
@@ -79,6 +103,7 @@ class LessonListAPIView(ListAPIView):
             else:
                 return Lesson.objects.filter(owner=user)
         return Lesson.objects.none()
+
 
     permission_classes = [IsModerator]
 
@@ -112,7 +137,7 @@ class LessonUpdateAPIView(UpdateAPIView):
                 return Lesson.objects.filter(owner=user)
         return Lesson.objects.none()
 
-    permission_classes = [IsModerator | IsOwner]
+    permission_classes = [IsAuthenticated, IsOwner]
 
 
 class LessonDestroyAPIView(DestroyAPIView):
@@ -125,4 +150,4 @@ class LessonDestroyAPIView(DestroyAPIView):
             return Lesson.objects.filter(owner=user)
         return Lesson.objects.none()
 
-    permission_classes = [~IsModerator, IsOwner]
+    permission_classes = [IsAuthenticated, IsOwner]
