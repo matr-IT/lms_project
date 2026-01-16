@@ -11,6 +11,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from users.models import Payment, User
 from users.serializers import PaymentSerializer, UserSerializer
+from users.services.stripe import create_stripe_price, create_stripe_checkout_session
 
 
 class UserCreateAPIView(CreateAPIView):
@@ -44,6 +45,15 @@ class PaymentViewSet(ModelViewSet):
         return Payment.objects.all()
 
     filter_backends = [filters.OrderingFilter, DjangoFilterBackend]
-    filterset_fields = ["course", "lesson", "payment_type"]
-    ordering_fields = ["payment_date"]
+    filterset_fields = ["user", "payment_sum"]
+    ordering_fields = ["user", "payment_sum", "payment_date"]
     serializer_class = PaymentSerializer
+
+    def perform_create(self, serializer):
+        payment = serializer.save(user=self.request.user)
+        price = create_stripe_price(payment.payment_sum)
+        session_id, link = create_stripe_checkout_session(price)
+        payment.session_id = session_id
+        payment.link = link
+
+        payment.save()

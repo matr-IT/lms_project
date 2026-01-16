@@ -47,22 +47,34 @@ class User(AbstractUser):
 
 class Payment(models.Model):
 
-    PAYMENT_CHOICES = (("cash", "наличные"), ("transaction", "перевод на счет"))
-
     user = models.ForeignKey(User, on_delete=CASCADE, verbose_name="Плательщик")
-
     payment_date = models.DateTimeField(verbose_name="дата оплаты", auto_now_add=True)
-
     paid_course = models.ForeignKey(
         Course, on_delete=CASCADE, verbose_name="Оплаченный курс", blank=True, null=True
     )
-
     paid_lesson = models.ForeignKey(
         Lesson, on_delete=CASCADE, verbose_name="Оплаченный урок", blank=True, null=True
     )
-
-    payment_sum = models.IntegerField(
+    payment_sum = models.PositiveIntegerField(
         verbose_name="Сумма оплаты", help_text="Введите сумму оплаты"
     )
+    link = models.URLField(
+        verbose_name="Ссылка на оплату",
+        help_text="Введите ссылку на оплату",
+        blank=True,
+        null=True,
+    )
+    session_id = models.CharField(
+        max_length=200,
+        verbose_name="ID сессии",
+        help_text="Введите ID сессии",
+        blank=True,
+        null=True,
+    )
 
-    payment_type = models.CharField(verbose_name="Тип платежа", choices=PAYMENT_CHOICES)
+    class Meta:
+        verbose_name = "Платеж"
+        verbose_name_plural = "Платежи"
+
+    def __str__(self):
+        return f"Платеж {self.pk} пользователя {self.user.email}"

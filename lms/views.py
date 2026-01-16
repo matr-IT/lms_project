@@ -104,7 +104,6 @@ class LessonListAPIView(ListAPIView):
                 return Lesson.objects.filter(owner=user)
         return Lesson.objects.none()
 
-
     permission_classes = [IsModerator]
 
 
