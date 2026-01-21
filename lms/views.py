@@ -14,6 +14,7 @@ from django.contrib.auth import get_user_model
 from lms.models import Course, Lesson, Subscription
 from lms.paginators import MyPagination
 from lms.serializers import CourseSerializer, LessonSerializer
+from lms.tasks import send_course_update_mail
 from users.permissions import IsModerator, IsOwner
 
 User = get_user_model()
@@ -36,6 +37,9 @@ class CourseViewSet(ModelViewSet):
     def perform_create(self, serializer):
         course = serializer.save()
         course.owner = self.request.user
+        if course:
+            send_course_update_mail.delay(course.pk)
+
         course.save()
 
     def get_permissions(self):

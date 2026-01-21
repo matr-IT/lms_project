@@ -34,6 +34,10 @@ class User(AbstractUser):
         max_length=100, verbose_name="токен", blank=True, null=True
     )
 
+    last_login = models.DateTimeField(
+        verbose_name="Последний вход", auto_now=True, null=True, blank=True
+    )
+
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
